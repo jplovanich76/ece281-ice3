@@ -5,7 +5,6 @@ library ieee;
 
 
 entity top_basys3 is
-
     port(
         -- Switches for input
         sw  : in  std_logic_vector(8 downto 0);
@@ -16,44 +15,38 @@ entity top_basys3 is
 end top_basys3;
 
 architecture top_basys3_arch of top_basys3 is 
-    -- 1️⃣ Declare the ripple_adder component
     component ripple_adder is
-        port (
-            A     : in std_logic_vector(3 downto 0);
-            B     : in std_logic_vector(3 downto 0);
-            Cin   : in std_logic;
-            S     : out std_logic_vector(3 downto 0);
-            Cout  : out std_logic
-        );
+        Port ( A : in STD_LOGIC_VECTOR (3 downto 0);
+           B : in STD_LOGIC_VECTOR (3 downto 0);
+           Cin : in STD_LOGIC;
+           S : out STD_LOGIC_VECTOR (3 downto 0);
+           Cout : out STD_LOGIC);
     end component ripple_adder;
 
-    -- 2️⃣ Declare internal signals
-    signal A    : std_logic_vector(3 downto 0); 
-    signal B    : std_logic_vector(3 downto 0);
-    signal Cin  : std_logic;
-    signal S    : std_logic_vector(3 downto 0);
-    signal Cout : std_logic;
-
+    signal w_carry  : STD_LOGIC_VECTOR(3 downto 0); -- 4 bits, 0/1/2/3
 begin
-    -- 3️⃣ Connect switches to input signals
-    A    <= sw(4 downto 1);   -- Switches 4-1 → A
-    B    <= sw(8 downto 5);   -- Switches 8-5 → B
-    Cin  <= sw(0);            -- Switch 0 → Cin
-
-    -- 4️⃣ Instantiate the ripple_adder component
     ripple_adder_inst: ripple_adder
     port map(
-        A    => A,
-        B    => B,
-        Cin  => Cin,
-        S    => S,
-        Cout => Cout
+    Cin => sw(0),
+    
+    A(0) => sw(1),
+    A(1) => sw(2),
+    A(2) => sw(3),
+    A(3) => sw(4),
+    
+    B(0) => sw(12),
+    B(1) => sw(13),
+    B(2) => sw(14),
+    B(3) => sw(15),
+    
+    S(0) => led(0),
+    S(1) => led(1),
+    S(2) => led(2),
+    S(3) => led(3),
+    
+    Cout => led(15)
     );
-
-    -- 5️⃣ Map the outputs to LEDs
-    led(3 downto 0)  <= S;       -- Sum output on LEDs 3-0
-    led(15)          <= Cout;    -- Carry-out on LED 15
-    led(14 downto 4) <= (others => '0'); -- Ground unused LEDs
-
+ 
+   led(14 downto 4) <= (others => '0');
 end top_basys3_arch;
 
