@@ -1,42 +1,3 @@
---+----------------------------------------------------------------------------
---| 
---| DESCRIPTION   : This file implements the top level module for a BASYS 
---|
---|     Ripple-Carry Adder: S = A + B
---|
---|     Our **user** will input the following:
---|
---|     - $C_{in}$ on switch 0
---|     - $A$ on switches 4-1
---|     - $B$ on switches 15-12
---|
---|     Our **user** will expect the following outputs:
---|
---|     - $Sum$ on LED 3-0
---|     - $C_{out} on LED 15
---|
---+----------------------------------------------------------------------------
---|
---| NAMING CONVENSIONS :
---|
---|    xb_<port name>           = off-chip bidirectional port ( _pads file )
---|    xi_<port name>           = off-chip input port         ( _pads file )
---|    xo_<port name>           = off-chip output port        ( _pads file )
---|    b_<port name>            = on-chip bidirectional port
---|    i_<port name>            = on-chip input port
---|    o_<port name>            = on-chip output port
---|    c_<signal name>          = combinatorial signal
---|    f_<signal name>          = synchronous signal
---|    ff_<signal name>         = pipeline stage (ff_, fff_, etc.)
---|    <signal name>_n          = active low signal
---|    w_<signal name>          = top level wiring signal
---|    g_<generic name>         = generic
---|    k_<constant name>        = constant
---|    v_<variable name>        = variable
---|    sm_<state machine type>  = state machine type definition
---|    s_<signal name>          = state name
---|
---+----------------------------------------------------------------------------
 
 library ieee;
   use ieee.std_logic_1164.all;
@@ -44,27 +5,55 @@ library ieee;
 
 
 entity top_basys3 is
-	port(
-		-- Switches
-		sw		:	in  std_logic_vector(15 downto 0);
-		
-		-- LEDs
-		led	    :	out	std_logic_vector(15 downto 0)
-	);
+
+    port(
+        -- Switches for input
+        sw  : in  std_logic_vector(8 downto 0);
+
+        -- LEDs for output
+        led : out std_logic_vector(15 downto 0)
+    );
 end top_basys3;
 
 architecture top_basys3_arch of top_basys3 is 
-	
-    -- declare the component of your top-level design
+    -- 1️⃣ Declare the ripple_adder component
+    component ripple_adder is
+        port (
+            A     : in std_logic_vector(3 downto 0);
+            B     : in std_logic_vector(3 downto 0);
+            Cin   : in std_logic;
+            S     : out std_logic_vector(3 downto 0);
+            Cout  : out std_logic
+        );
+    end component ripple_adder;
 
-    -- declare any signals you will need	
-  
+    -- 2️⃣ Declare internal signals
+    signal A    : std_logic_vector(3 downto 0); 
+    signal B    : std_logic_vector(3 downto 0);
+    signal Cin  : std_logic;
+    signal S    : std_logic_vector(3 downto 0);
+    signal Cout : std_logic;
+
 begin
-	-- PORT MAPS --------------------
-   
-	---------------------------------
-	
-	-- CONCURRENT STATEMENTS --------
-	led(14 downto 4) <= (others => '0'); -- Ground unused LEDs
-	---------------------------------
+    -- 3️⃣ Connect switches to input signals
+    A    <= sw(4 downto 1);   -- Switches 4-1 → A
+    B    <= sw(8 downto 5);   -- Switches 8-5 → B
+    Cin  <= sw(0);            -- Switch 0 → Cin
+
+    -- 4️⃣ Instantiate the ripple_adder component
+    ripple_adder_inst: ripple_adder
+    port map(
+        A    => A,
+        B    => B,
+        Cin  => Cin,
+        S    => S,
+        Cout => Cout
+    );
+
+    -- 5️⃣ Map the outputs to LEDs
+    led(3 downto 0)  <= S;       -- Sum output on LEDs 3-0
+    led(15)          <= Cout;    -- Carry-out on LED 15
+    led(14 downto 4) <= (others => '0'); -- Ground unused LEDs
+
 end top_basys3_arch;
+
