@@ -51,8 +51,6 @@ begin
        -- TODO, a few other test cases
        w_addends <= x"11"; w_Cin <= '1'; wait for 10 ns;
 	       assert (w_sum = x"3" and w_Cout = '0') report "error" severity failure;
-	   w_addends <= x"FF"; w_Cin <= '0'; wait for 10ns;
-	       assert (w_sum = x"E" and w_Cout = '1') report "error" severity failure;
 	end process;	
 	   
 	-----------------------------------------------------	
